@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horario de Clausura - Generación 2023-2026</title>
+    <style>
+        /* Ajustes generales del fondo */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #0b1a30; /* Azul marino inspirado en tu diseño */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: sans-serif;
+        }
+
+        /* Contenedor de la imagen con la animación inicial */
+        .horario-container {
+            width: 100%;
+            max-width: 500px; /* Ideal para la pantalla de un celular */
+            padding: 20px;
+            box-sizing: border-box;
+            opacity: 0; /* Empieza invisible */
+            transform: translateY(30px); /* Empieza un poco más abajo */
+            animation: aparecerSuave 1.2s ease-out forwards; /* Llama a la animación */
+        }
+
+        /* Estilo para que la imagen se vea estética y con bordes suaves */
+        .horario-img {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6); /* Sombra para dar profundidad */
+        }
+
+        /* Fotogramas clave para el efecto de aparición */
+        @keyframes aparecerSuave {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="horario-container">
+        <img src="horario1.png" alt="Horarios Oficiales del Evento" class="horario-img">
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script>
+        // Función que se ejecuta en cuanto la página termina de cargar
+        window.onload = function() {
+            var duration = 2500; // El confeti durará 2.5 segundos
+            var end = Date.now() + duration;
+
+            (function frame() {
+                // Configuramos los disparos de confeti desde los bordes (colores dorados y blancos)
+                confetti({
+                    particleCount: 4,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#D4AF37', '#FFDF00', '#FFFFFF'] 
+                });
+                confetti({
+                    particleCount: 4,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#D4AF37', '#FFDF00', '#FFFFFF']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        };
+    </script>
+</body>
+</html>
