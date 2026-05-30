@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Clausura San Andrés - Generación 2023-2026</title>
-    <link rel="preload" as="image" href="horario1.jpg">
+    
+    <link rel="preload" as="image" href="horario1.png">
+    <link rel="preload" as="image" href="birrete.png">
+
     <style>
-        /* Paleta de colores Premium */
         :root {
             --azul-profundo: #071324;
             --azul-gradiente: radial-gradient(circle at center, #0f233c 0%, #050d1a 100%);
@@ -30,7 +32,18 @@
             color: white;
         }
 
-        /* --- PANTALLA DE CUENTA REGRESIVA (RELOJ) --- */
+        /* --- CONTENEDOR DE LA LLUVIA DE SOMBREROS --- */
+        #tsparticles {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 50; /* Detrás del horario, delante del fondo */
+            display: none; /* Oculto durante el reloj */
+        }
+
+        /* --- PANTALLA DE CUENTA REGRESIVA --- */
         #countdown-screen {
             position: fixed;
             top: 0;
@@ -46,7 +59,7 @@
             text-align: center;
             padding: 20px;
             opacity: 1;
-            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: opacity 0.8s ease;
         }
 
         .countdown-titulo {
@@ -77,30 +90,30 @@
             font-size: 2rem;
             color: var(--oro-brillante);
             font-weight: bold;
-            margin-bottom: 5px;
         }
 
         .timer-texto {
             font-size: 0.7rem;
             text-transform: uppercase;
-            letter-spacing: 1px;
             color: #ffffff;
             opacity: 0.8;
         }
 
         /* --- VISTA DEL HORARIO --- */
         #main-content {
-            display: none; /* Oculto al inicio */
+            display: none;
             width: 100%;
             height: 100%;
             justify-content: center;
             align-items: flex-start;
             overflow-y: auto;
             padding: 15px;
-            background: var(--azul-gradiente);
+            background: transparent; /* Fondo transparente para ver la lluvia */
+            z-index: 100;
+            position: relative;
             opacity: 0;
             transform: scale(0.96) translateY(30px);
-            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 1.2s ease, transform 1.2s ease;
         }
 
         #main-content.activo {
@@ -116,7 +129,7 @@
             margin: auto;
             border-radius: 16px;
             overflow: hidden;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 40px rgba(229, 192, 96, 0.15);
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
         }
 
         .horario-img {
@@ -125,7 +138,6 @@
             display: block;
         }
 
-        /* Destello de luz metálico (Efecto Sheen) */
         .horario-wrapper::after {
             content: '';
             position: absolute;
@@ -135,11 +147,10 @@
             height: 100%;
             background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0) 100%);
             transform: skewX(-25deg);
-            pointer-events: none;
         }
 
         .horario-wrapper.brillar::after {
-            animation: pasarDestello 1.4s cubic-bezier(0.3, 1, 0.4, 1) 0.5s forwards;
+            animation: pasarDestello 1.4s ease 0.5s forwards;
         }
 
         @keyframes pasarDestello {
@@ -149,111 +160,114 @@
 </head>
 <body>
 
+    <div id="tsparticles"></div>
+
     <div id="countdown-screen">
-        <div class="intro-titulo" style="font-size: 0.9rem; color: #fff; opacity: 0.6; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 5px;">Módulo San Andrés</div>
         <div class="countdown-titulo">Falta para la Clausura</div>
-        
         <div class="timer-container">
-            <div class="timer-box">
-                <div class="timer-numero" id="dias">00</div>
-                <div class="timer-texto">Días</div>
-            </div>
-            <div class="timer-box">
-                <div class="timer-numero" id="horas">00</div>
-                <div class="timer-texto">Horas</div>
-            </div>
-            <div class="timer-box">
-                <div class="timer-numero" id="minutos">00</div>
-                <div class="timer-texto">Minutos</div>
-            </div>
-            <div class="timer-box">
-                <div class="timer-numero" id="segundos">00</div>
-                <div class="timer-texto">Segundos</div>
-            </div>
+            <div class="timer-box"><div class="timer-numero" id="dias">00</div><div class="timer-texto">Días</div></div>
+            <div class="timer-box"><div class="timer-numero" id="horas">00</div><div class="timer-texto">Horas</div></div>
+            <div class="timer-box"><div class="timer-numero" id="minutos">00</div><div class="timer-texto">Minutos</div></div>
+            <div class="timer-box"><div class="timer-numero" id="segundos">00</div><div class="timer-texto">Segundos</div></div>
         </div>
     </div>
 
     <div id="main-content">
         <div class="horario-wrapper" id="horario-card">
-            <img src="horario.png" alt="Horario Oficial de Clausura" class="horario-img">
+            <img src="horario.jpg" alt="Horario Oficial" class="horario-img">
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tsparticles-confetti@2.12.0/tsparticles.confetti.bundle.min.js"></script>
     
     <script>
-        // Fecha de la graduación para el cálculo del reloj
         const fechaGraduacion = new Date("Jul 10, 2026 00:00:00").getTime();
 
-        // 1. Hace funcionar el reloj en tiempo real durante la espera
         const actualizarReloj = setInterval(function() {
             const ahora = new Date().getTime();
             const distancia = fechaGraduacion - ahora;
-
             const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
             const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
             const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
-
-            document.getElementById("dias").innerHTML = dias < 10 ? '0' + dias : dias;
-            document.getElementById("horas").innerHTML = horas < 10 ? '0' + horas : horas;
-            document.getElementById("minutos").innerHTML = minutos < 10 ? '0' + minutos : minutos;
-            document.getElementById("segundos").innerHTML = segundos < 10 ? '0' + segundos : segundos;
+            document.getElementById("dias").innerHTML = dias;
+            document.getElementById("horas").innerHTML = horas;
+            document.getElementById("minutos").innerHTML = minutos;
+            document.getElementById("segundos").innerHTML = segundos;
         }, 1000);
 
-        // 2. Temporizador automático: Desvanece el reloj a los 4 segundos (4000ms)
+        // Temporizador de 4 segundos
         setTimeout(function() {
-            clearInterval(actualizarReloj); // Detiene el contador interno
-            
+            clearInterval(actualizarReloj);
             const relojPantalla = document.getElementById("countdown-screen");
-            relojPantalla.style.opacity = '0'; // Aplica transición de desvanecido
-
-            // Espera a que termine la animación de desvanecido para cambiar las pantallas
+            relojPantalla.style.opacity = '0';
             setTimeout(() => {
                 relojPantalla.style.display = 'none';
                 mostrarHorarioOficial();
             }, 800);
-
         }, 4000); 
 
-        // 3. Función que despliega el horario con los efectos premium
         function mostrarHorarioOficial() {
-            document.body.style.overflow = 'auto'; // Habilita el scroll por si la pantalla es pequeña
+            document.body.style.overflow = 'auto';
+            document.getElementById('tsparticles').style.display = 'block'; // Muestra contenedor de lluvia
+            
+            // Inicia la lluvia de sombreros
+            iniciarLluviaSombreros();
 
             const contenido = document.getElementById('main-content');
             contenido.classList.add('activo');
-            
             const tarjeta = document.getElementById('horario-card');
             tarjeta.classList.add('brillar');
-
-            lanzarConfetiPremium();
         }
 
-        // 4. Efecto de confeti en tonos dorados
-        function lanzarConfetiPremium() {
-            var duration = 2000;
-            var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 28, spread: 60, ticks: 50, zIndex: 99 };
-
-            function randomInRange(min, max) { return Math.random() * (max - min) + min; }
-
-            var interval = setInterval(function() {
-                var timeLeft = animationEnd - Date.now();
-                if (timeLeft <= 0) return clearInterval(interval);
-
-                var particleCount = 30 * (timeLeft / duration);
-                
-                confetti(Object.assign({}, defaults, { 
-                    particleCount, 
-                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 },
-                    colors: ['#E5C060', '#F3E5AB', '#FFFFFF']
-                }));
-                confetti(Object.assign({}, defaults, { 
-                    particleCount, 
-                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 },
-                    colors: ['#E5C060', '#F3E5AB', '#FFFFFF']
-                }));
-            }, 180);
+        // Configuración avanzada de la lluvia de birretes
+        function iniciarLluviaSombreros() {
+            confetti("tsparticles", {
+                particles: {
+                    number: {
+                        value: 15, // Cantidad de sombreros en pantalla
+                        density: { enable: true, value_area: 800 }
+                    },
+                    shape: {
+                        type: "image",
+                        image: {
+                            src: "birrete.png", // Nombre exacto de tu imagen
+                            width: 100,
+                            height: 100
+                        }
+                    },
+                    opacity: {
+                        value: 0.8,
+                        random: true,
+                    },
+                    size: {
+                        value: 25, // Tamaño de los sombreros
+                        random: true,
+                        anim: { enable: false }
+                    },
+                    move: {
+                        enable: true,
+                        speed: 3, // Velocidad de caída
+                        direction: "bottom", // Caen hacia abajo
+                        random: false,
+                        straight: false,
+                        out_mode: "out", // Reaparecen arriba al salir
+                        bounce: false,
+                    },
+                    rotate: {
+                        value: 0,
+                        random: true,
+                        direction: "clockwise",
+                        animation: {
+                            enable: true,
+                            speed: 5, // Velocidad de rotación al caer
+                            sync: false
+                        }
+                    }
+                },
+                interactivity: { enable: false },
+                retina_detect: true
+            });
         }
     </script>
 </body>
