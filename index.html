@@ -59,26 +59,38 @@
 
         #main-content.activo { display: flex; opacity: 1; transform: scale(1); }
 
-        /* --- EFECTO DE BRILLO EN LA IMAGEN (GLASS GLINT) --- */
+        /* --- CONTENEDOR CON EFECTO DE BRILLO (GLASS GLINT) --- */
         .horario-wrapper {
             position: relative;
             width: 100%;
             max-width: 450px;
             margin: auto;
             border-radius: 15px;
-            overflow: hidden; /* Corta el brillo para que no se salga de la imagen */
+            overflow: hidden; 
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
             border: 1px solid rgba(229, 192, 96, 0.3);
         }
 
         .horario-img { width: 100%; height: auto; display: block; }
 
+        /* Zona interactiva invisible en la parte inferior */
+        .enlace-inferior {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 15%; /* Cubre el 15% inferior de la imagen */
+            background: rgba(255, 255, 255, 0); /* Completamente transparente */
+            z-index: 80; /* Por encima de la imagen y del destello para que sea cliqueable */
+            cursor: pointer;
+        }
+
         /* Capa superior que crea el destello de luz */
         .horario-wrapper::after {
             content: "";
             position: absolute;
             top: 0;
-            left: -150%; /* Empieza fuera de la imagen a la izquierda */
+            left: -150%; 
             width: 50%;
             height: 100%;
             background: linear-gradient(
@@ -87,19 +99,20 @@
                 rgba(255, 255, 255, 0.4) 50%, 
                 rgba(255, 255, 255, 0) 100%
             );
-            transform: skewX(-25deg); /* Inclinación del reflejo */
+            transform: skewX(-25deg); 
             pointer-events: none;
+            z-index: 60;
         }
 
-        /* Animación del brillo: se repite cada 4 segundos */
+        /* Animación del brillo cada 4 segundos */
         #main-content.activo .horario-wrapper::after {
             animation: reflejoCristal 4s infinite ease-in-out;
         }
 
         @keyframes reflejoCristal {
             0% { left: -150%; }
-            20% { left: 150%; } /* El brillo cruza rápido */
-            100% { left: 150%; } /* Pausa antes de volver a brillar */
+            20% { left: 150%; } 
+            100% { left: 150%; } 
         }
 
     </style>
@@ -109,7 +122,7 @@
     <div id="tsparticles"></div>
 
     <div id="countdown-screen">
-        <h2 style="color: var(--oro-brillante); letter-spacing: 3px;">FALTA PARA LA CLAUSURA</h2>
+        <h2 style="color: var(--oro-brillante); letter-spacing: 3px; font-size: 1.3rem;">FALTA PARA LA CLAUSURA</h2>
         <div class="timer-container">
             <div class="timer-box"><div class="timer-numero" id="dias">00</div><div class="timer-texto">Días</div></div>
             <div class="timer-box"><div class="timer-numero" id="horas">00</div><div class="timer-texto">Horas</div></div>
@@ -121,13 +134,15 @@
     <div id="main-content">
         <div class="horario-wrapper">
             <img src="horario.jpg" alt="Horario Oficial" class="horario-img">
+            
+            <a href="https://arceo86.github.io/prepaSA26/index.html" class="enlace-inferior" title="Ir al inicio"></a>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/tsparticles@2/tsparticles.bundle.min.js"></script>
     
     <script>
-        // 1. Lógica del Reloj
+        // Lógica del contador
         const fechaGraduacion = new Date("Jul 10, 2026 00:00:00").getTime();
         const tick = setInterval(() => {
             const ahora = new Date().getTime();
@@ -138,7 +153,7 @@
             document.getElementById("segundos").innerHTML = Math.floor((d % (1000*60)) / 1000);
         }, 1000);
 
-        // 2. Transición automática a los 4 segundos
+        // Transición automática del reloj al horario a los 4 segundos
         setTimeout(() => {
             clearInterval(tick);
             const screen = document.getElementById("countdown-screen");
@@ -153,7 +168,7 @@
             document.body.style.overflow = 'auto';
             document.getElementById('tsparticles').style.display = 'block';
             
-            // Iniciar lluvia de sombreros
+            // Iniciar lluvia continua de birretes
             tsParticles.load("tsparticles", {
                 fullScreen: { enable: false },
                 particles: {
