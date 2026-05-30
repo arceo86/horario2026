@@ -29,7 +29,7 @@
             color: white;
         }
 
-        /* --- PANTALLA DE CUENTA REGRESIVA --- */
+        /* --- PANTALLA DE CUENTA REGRESIVA (RELOJ) --- */
         #countdown-screen {
             position: fixed;
             top: 0;
@@ -44,6 +44,8 @@
             align-items: center;
             text-align: center;
             padding: 20px;
+            opacity: 1;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .countdown-titulo {
@@ -85,56 +87,9 @@
             opacity: 0.8;
         }
 
-        /* --- PANTALLA DE INTRO Y HORARIO (Ocultas por defecto) --- */
-        #intro-overlay, #main-content {
-            display: none; /* Se activan vía JavaScript si ya es la fecha */
-        }
-
-        #intro-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--azul-gradiente);
-            z-index: 100;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 30px;
-            transition: opacity 0.8s, visibility 0.8s;
-            cursor: pointer;
-        }
-
-        .intro-titulo {
-            color: var(--oro-brillante);
-            font-size: 1.4rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin: 5px 0;
-            text-shadow: 0 2px 10px rgba(229, 192, 96, 0.3);
-        }
-
-        .intro-sub {
-            color: #ffffff;
-            font-size: 0.95rem;
-            opacity: 0.7;
-            letter-spacing: 2px;
-            margin-top: 5px;
-        }
-
-        .toque-continuar {
-            position: absolute;
-            bottom: 12%;
-            color: var(--oro-suave);
-            font-size: 1.1rem;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            animation: pulsoBrillo 2s infinite;
-        }
-
+        /* --- VISTA DEL HORARIO --- */
         #main-content {
+            display: none; /* Oculto al inicio */
             width: 100%;
             height: 100%;
             justify-content: center;
@@ -144,7 +99,7 @@
             background: var(--azul-gradiente);
             opacity: 0;
             transform: scale(0.96) translateY(30px);
-            transition: opacity 1.2s, transform 1.2s;
+            transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         #main-content.activo {
@@ -169,6 +124,7 @@
             display: block;
         }
 
+        /* Destello de luz metálico (Efecto Sheen) */
         .horario-wrapper::after {
             content: '';
             position: absolute;
@@ -185,11 +141,6 @@
             animation: pasarDestello 1.4s cubic-bezier(0.3, 1, 0.4, 1) 0.5s forwards;
         }
 
-        @keyframes pulsoBrillo {
-            0%, 100% { opacity: 0.3; transform: scale(0.98); }
-            50% { opacity: 1; transform: scale(1.02); text-shadow: 0 0 8px rgba(243,229,171,0.6); }
-        }
-
         @keyframes pasarDestello {
             100% { left: 150%; }
         }
@@ -198,8 +149,8 @@
 <body>
 
     <div id="countdown-screen">
-        <div class="intro-titulo" style="font-size: 0.9rem; color: #fff; opacity: 0.6; letter-spacing: 5px;">Módulo San Andrés</div>
-        <div class="countdown-titulo">Faltan para la Clausura</div>
+        <div class="intro-titulo" style="font-size: 0.9rem; color: #fff; opacity: 0.6; letter-spacing: 5px; text-transform: uppercase; margin-bottom: 5px;">Módulo San Andrés</div>
+        <div class="countdown-titulo">Falta para la Clausura</div>
         
         <div class="timer-container">
             <div class="timer-box">
@@ -221,16 +172,6 @@
         </div>
     </div>
 
-    <div id="intro-overlay" onclick="iniciarExperiencia()">
-        <div class="intro-titulo" style="font-size: 0.9rem; color: #fff; opacity: 0.6; letter-spacing: 5px;">UdeG</div>
-        <div class="intro-titulo">Módulo San Andrés</div>
-        <div class="intro-sub">Generación 2023 – 2026</div>
-        
-        <div class="toque-continuar">
-            <span>👇</span> Toque para continuar <span>👇</span>
-        </div>
-    </div>
-
     <div id="main-content">
         <div class="horario-wrapper" id="horario-card">
             <img src="horario.png" alt="Horario Oficial de Clausura" class="horario-img">
@@ -240,51 +181,54 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <script>
-        // Fecha exacta de la clausura: 10 de Julio de 2026 a las 00:00 hrs
+        // Fecha de la graduación para el cálculo del reloj
         const fechaGraduacion = new Date("Jul 10, 2026 00:00:00").getTime();
 
-        // Lógica de validación de fecha
-        const x = setInterval(function() {
+        // 1. Hace funcionar el reloj en tiempo real durante la espera
+        const actualizarReloj = setInterval(function() {
             const ahora = new Date().getTime();
             const distancia = fechaGraduacion - ahora;
 
-            // Si aún NO es 10 de Julio (Mostrar Cuenta Regresiva)
-            if (distancia > 0) {
-                const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
-                const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
-                const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
+            const dias = Math.floor(distancia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((distancia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((distancia % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((distancia % (1000 * 60)) / 1000);
 
-                document.getElementById("dias").innerHTML = dias < 10 ? '0' + dias : dias;
-                document.getElementById("horas").innerHTML = horas < 10 ? '0' + horas : horas;
-                document.getElementById("minutos").innerHTML = minutos < 10 ? '0' + minutos : minutos;
-                document.getElementById("segundos").innerHTML = segundos < 10 ? '0' + segundos : segundos;
-            } 
-            // Si YA es 10 de Julio o posterior (Mostrar Horario Interactivo)
-            else {
-                clearInterval(x);
-                document.getElementById("countdown-screen").style.display = "none";
-                document.getElementById("intro-overlay").style.display = "flex";
-            }
+            document.getElementById("dias").innerHTML = dias < 10 ? '0' + dias : dias;
+            document.getElementById("horas").innerHTML = horas < 10 ? '0' + horas : horas;
+            document.getElementById("minutos").innerHTML = minutos < 10 ? '0' + minutos : minutos;
+            document.getElementById("segundos").innerHTML = segundos < 10 ? '0' + segundos : segundos;
         }, 1000);
 
-        // Lógica para la transición del Horario y Confeti
-        function iniciarExperiencia() {
-            const intro = document.getElementById('intro-overlay');
-            intro.style.opacity = '0';
-            setTimeout(() => { intro.style.display = 'none'; }, 800);
-
-            document.body.style.overflow = 'auto';
-
-            const content = document.getElementById('main-content');
-            content.classList.add('activo');
+        // 2. Temporizador automático: Desvanece el reloj a los 4 segundos (4000ms)
+        setTimeout(function() {
+            clearInterval(actualizarReloj); // Detiene el contador interno
             
-            const card = document.getElementById('horario-card');
-            card.classList.add('brillar');
+            const relojPantalla = document.getElementById("countdown-screen");
+            relojPantalla.style.opacity = '0'; // Aplica transición de desvanecido
+
+            // Espera a que termine la animación de desvanecido para cambiar las pantallas
+            setTimeout(() => {
+                relojPantalla.style.display = 'none';
+                mostrarHorarioOficial();
+            }, 800);
+
+        }, 4000); 
+
+        // 3. Función que despliega el horario con los efectos premium
+        function mostrarHorarioOficial() {
+            document.body.style.overflow = 'auto'; // Habilita el scroll por si la pantalla es pequeña
+
+            const contenido = document.getElementById('main-content');
+            contenido.classList.add('activo');
+            
+            const tarjeta = document.getElementById('horario-card');
+            tarjeta.classList.add('brillar');
 
             lanzarConfetiPremium();
         }
 
+        // 4. Efecto de confeti en tonos dorados
         function lanzarConfetiPremium() {
             var duration = 2000;
             var animationEnd = Date.now() + duration;
